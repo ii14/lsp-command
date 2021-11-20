@@ -1,7 +1,9 @@
 *lsp-command.txt*                                         Lsp command
 
 ==============================================================================
-:Lsp {subcommand} [arguments]                           *:Lsp* *lsp-command*
+:Lsp {subcommand} [arguments]                           *:Lsp* *:lsp* *lsp-command*
+        Lowercase *:lsp* alias is defined by default, meaning you don't
+        have to capitalize the command name. Example: `:lsp def`
 
 ------------------------------------------------------------------------------
 GLOBAL COMMANDS                                         *lsp-command-global*
@@ -112,7 +114,7 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
 OPTIONS                                                 *lsp-command-options*
 
 *g:lsp_no_lowercase*
-        Set to true to disable lowercase command alias *:lsp*
+        Set to true to disable the lowercase :lsp command alias.
 
 *g:lsp_legacy_commands*
         Set to true to enable legacy commands: :LspInfo, :LspStart, etc.
