@@ -385,3 +385,12 @@ vim.cmd([[
     \   'args': <q-args>, 'range': <range>, 'line1': <line1>, 'line2': <line2>,
     \ }])
 ]])
+
+local no_lowercase = vim.g.lsp_no_lowercase
+if no_lowercase == nil or (no_lowercase ~= false and no_lowercase ~= 0) then
+  -- TODO: better range matching
+  vim.cmd([[
+    cnoreabbrev <expr> lsp getcmdtype() ==# ':' &&
+      \ (getcmdline() ==# 'lsp' <bar><bar> getcmdline() ==# "'<,'>lsp") ? 'Lsp' : 'lsp'
+  ]])
+end
