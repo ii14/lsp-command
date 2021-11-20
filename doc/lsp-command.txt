@@ -108,5 +108,14 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
 :Lsp o[utgoingcalls]                                    *:Lsp-outgoingcalls*
         |vim.lsp.buf.outgoing_calls()|
 
+------------------------------------------------------------------------------
+OPTIONS                                                 *lsp-command-options*
+
+*g:lsp_no_lowercase*
+        Set to true to disable lowercase command alias *:lsp*
+
+*g:lsp_legacy_commands*
+        Set to true to enable legacy commands: :LspInfo, :LspStart, etc.
+
 ==============================================================================
 vim:tw=78:sw=8:sts=8:et:ft=help:norl:
