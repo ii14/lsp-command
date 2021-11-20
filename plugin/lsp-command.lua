@@ -86,14 +86,13 @@ define_command{
       local kinds = {}
       for _, client in ipairs(vim.lsp.buf_get_clients()) do
         local code_action = client.resolved_capabilities.code_action
-        if code_action then
+        if type(code_action) == 'table' then
           for _, kind in ipairs(code_action.codeActionKinds) do
             kinds[kind] = true
           end
         end
       end
-      kinds = vim.tbl_keys(kinds)
-      return complete_filter(args[#args], kinds)
+      return complete_filter(args[#args], vim.tbl_keys(kinds))
     end
   end,
 }
