@@ -51,15 +51,58 @@ local function parse_clients(args)
   return vim.tbl_values(clients)
 end
 
-local function wrap_simple_command(func)
-  return function(args)
-    if #args ~= 0 then
-      return echoerr('No arguments allowed')
-    end
-    func()
-  end
+local function simple_command(name, func, capability)
+  return {
+    command = name,
+    attached = true,
+    range = false,
+    run = function(args)
+      if #args ~= 0 then
+        return echoerr('No arguments allowed')
+      end
+      func()
+    end,
+    capability = capability,
+  }
 end
 
+local definition     = simple_command('definition', vim.lsp.buf.definition, 'definition')
+local declaration    = simple_command('declaration', vim.lsp.buf.declaration, 'declaration')
+local typedefinition = simple_command('typedefinition', vim.lsp.buf.type_definition, 'type_definition')
+local symbols        = simple_command('symbols', vim.lsp.buf.document_symbol, 'document_symbol')
+local hover          = simple_command('hover', vim.lsp.buf.hover, 'hover')
+local implementation = simple_command('implementation', vim.lsp.buf.implementation, 'implementation')
+local references     = simple_command('references', vim.lsp.buf.references, 'references')
+local signature      = simple_command('signature', vim.lsp.buf.signature_help, 'signature_help')
+local incomingcalls  = simple_command('incomingcalls', vim.lsp.buf.incoming_calls, 'call_hierarchy')
+local outgoingcalls  = simple_command('outgoingcalls', vim.lsp.buf.outgoing_calls, 'call_hierarchy')
+
+local rename = {
+  command = 'rename',
+  attached = true,
+  range = false,
+  run = function(args)
+    if #args > 1 then
+      return echoerr('Expected zero or one argument')
+    end
+    vim.lsp.buf.rename(args[1])
+  end,
+  capability = 'rename',
+}
+
+local find = {
+  -- TODO: different name? "symbols" is used by document_symbol
+  command = 'find',
+  attached = true,
+  range = false,
+  run = function(args)
+    if #args > 1 then
+      return echoerr('Expected zero or one argument')
+    end
+    vim.lsp.buf.workspace_symbol(args[1] or '')
+  end,
+  capability = 'workspace_symbol',
+}
 
 local codeaction = {
   command = 'codeaction',
@@ -91,83 +134,6 @@ local codeaction = {
     end
   end,
   capability = 'code_action',
-}
-
-local definition = {
-  command = 'definition',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.definition),
-  capability = 'definition',
-}
-
-local declaration = {
-  command = 'declaration',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.declaration),
-  capability = 'declaration',
-}
-
-local typedefinition = {
-  command = 'typedefinition',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.type_definition),
-  capability = 'type_definition',
-}
-
-local symbols = {
-  command = 'symbols',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.document_symbol),
-  capability = 'document_symbol',
-}
-
-local hover = {
-  command = 'hover',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.hover),
-  capability = 'hover',
-}
-
-local implementation = {
-  command = 'implementation',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.implementation),
-  capability = 'implementation',
-}
-
-local references = {
-  command = 'references',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.references),
-  capability = 'references',
-}
-
-local signature = {
-  command = 'signature',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.signature_help),
-  capability = 'signature_help',
-}
-
-local rename = {
-  command = 'rename',
-  attached = true,
-  range = false,
-  run = function(args)
-    if #args > 1 then
-      return echoerr('Expected zero or one argument')
-    end
-    vim.lsp.buf.rename(args[1])
-  end,
-  capability = 'rename',
 }
 
 local format = {
@@ -248,20 +214,6 @@ local format = {
     end
   end,
   capability = 'formatting', -- TODO: check range_formatting
-}
-
-local find = {
-  -- TODO: different name? "symbols" is used by document_symbol
-  command = 'find',
-  attached = true,
-  range = false,
-  run = function(args)
-    if #args > 1 then
-      return echoerr('Expected zero or one argument')
-    end
-    vim.lsp.buf.workspace_symbol(args[1] or '')
-  end,
-  capability = 'workspace_symbol',
 }
 
 local workspace = {
@@ -376,22 +328,6 @@ local restart = {
     end
   end,
   complete = complete_active_clients,
-}
-
-local incomingcalls = {
-  command = 'incomingcalls',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.incoming_calls),
-  capability = 'call_hierarchy',
-}
-
-local outgoingcalls = {
-  command = 'outgoingcalls',
-  attached = true,
-  range = false,
-  run = wrap_simple_command(vim.lsp.buf.outgoing_calls),
-  capability = 'call_hierarchy',
 }
 
 
