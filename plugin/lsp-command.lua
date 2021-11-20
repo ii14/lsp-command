@@ -233,7 +233,24 @@ define_command{
     end
   end,
   complete = function(args)
-    return complete_filter(args[#args], {'sync', 'order='})
+    local arg = args[#args]
+    local start, match = arg:match('^order=(.-)([^,]*)$')
+    if start then
+      local values = vim.split(start, ',', { trimempty = true, plain = true })
+      local lookup = {}
+      for _, k in ipairs(values) do
+        lookup[k] = true
+      end
+      local results = {}
+      for _, server in ipairs(require('lspconfig').available_servers()) do
+        if not lookup[server] and fn.stridx(server, match) == 0 then
+          table.insert(results, 'order='..start..server)
+        end
+      end
+      return results
+    else
+      return complete_filter(arg, {'sync', 'order='})
+    end
   end,
   capability = 'formatting', -- TODO: check range_formatting
 }
