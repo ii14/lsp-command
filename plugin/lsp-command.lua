@@ -322,6 +322,20 @@ define_command{
   complete = complete_active_clients,
 }
 
+define_command{
+  command = 'incomingcalls',
+  attached = true,
+  range = false,
+  run = wrap_simple_command(vim.lsp.buf.incoming_calls),
+}
+
+define_command{
+  command = 'outgoingcalls',
+  attached = true,
+  range = false,
+  run = wrap_simple_command(vim.lsp.buf.outgoing_calls),
+}
+
 
 for _, command in ipairs(commands) do
   local name = command.command

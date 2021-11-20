@@ -87,5 +87,11 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
         |vim.lsp.buf.add_workspace_folder()|,
         |vim.lsp.buf.remove_workspace_folder()|
 
+:Lsp inc[omingcalls]                                    *:Lsp-incomingcalls*
+        |vim.lsp.buf.incoming_calls()|
+
+:Lsp o[utgoingcalls]                                    *:Lsp-outgoingcalls*
+        |vim.lsp.buf.outgoing_calls()|
+
 ==============================================================================
 vim:tw=78:sw=8:sts=8:et:ft=help:norl:
