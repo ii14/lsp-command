@@ -42,9 +42,6 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
 :Lsp r[eferences]                                       *:Lsp-references*
         |vim.lsp.buf.references()|
 
-:Lsp s[ymbols]                                          *:Lsp-symbols*
-        |vim.lsp.buf.document_symbol()|
-
 :Lsp h[over]                                            *:Lsp-hover*
         |vim.lsp.buf.hover()|
 
@@ -83,6 +80,15 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
         language server.
 
         |vim.lsp.buf.code_action()|, |vim.lsp.buf.range_code_action()|
+
+:Lsp s[ymbols]                                          *:Lsp-symbols*
+        |vim.lsp.buf.document_symbol()|
+
+:Lsp fi[nd] [{name}]                                    *:Lsp-find*
+        Lists symbols in the current workspace matching {name}. If no name is
+        provided, lists all symbols.
+
+        |vim.lsp.buf.workspace_symbol()|
 
 :Lsp w[orkspace] [add,remove {folder}]                  *:Lsp-workspace*
         Without arguments lists workspace folders.

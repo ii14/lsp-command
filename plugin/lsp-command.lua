@@ -222,6 +222,19 @@ define_command{
 }
 
 define_command{
+  -- TODO: different name? "symbols" is used by document_symbol
+  command = 'find',
+  attached = true,
+  range = false,
+  run = function(args)
+    if #args > 1 then
+      return echoerr('Expected zero or one argument')
+    end
+    vim.lsp.buf.workspace_symbol(args[1] or '')
+  end,
+}
+
+define_command{
   command = 'workspace',
   range = false,
   attached = true,
