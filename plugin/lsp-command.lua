@@ -60,13 +60,8 @@ local function wrap_simple_command(func)
   end
 end
 
-local commands = {}
-local function define_command(command)
-  table.insert(commands, command)
-end
 
-
-define_command{
+local codeaction = {
   command = 'codeaction',
   attached = true,
   -- TODO: would be cool to provide a /pattern/ to filter code actions
@@ -98,7 +93,7 @@ define_command{
   capability = 'code_action',
 }
 
-define_command{
+local definition = {
   command = 'definition',
   attached = true,
   range = false,
@@ -106,7 +101,7 @@ define_command{
   capability = 'definition',
 }
 
-define_command{
+local declaration = {
   command = 'declaration',
   attached = true,
   range = false,
@@ -114,7 +109,7 @@ define_command{
   capability = 'declaration',
 }
 
-define_command{
+local typedefinition = {
   command = 'typedefinition',
   attached = true,
   range = false,
@@ -122,7 +117,7 @@ define_command{
   capability = 'type_definition',
 }
 
-define_command{
+local symbols = {
   command = 'symbols',
   attached = true,
   range = false,
@@ -130,7 +125,7 @@ define_command{
   capability = 'document_symbol',
 }
 
-define_command{
+local hover = {
   command = 'hover',
   attached = true,
   range = false,
@@ -138,7 +133,7 @@ define_command{
   capability = 'hover',
 }
 
-define_command{
+local implementation = {
   command = 'implementation',
   attached = true,
   range = false,
@@ -146,7 +141,7 @@ define_command{
   capability = 'implementation',
 }
 
-define_command{
+local references = {
   command = 'references',
   attached = true,
   range = false,
@@ -154,7 +149,7 @@ define_command{
   capability = 'references',
 }
 
-define_command{
+local signature = {
   command = 'signature',
   attached = true,
   range = false,
@@ -162,7 +157,7 @@ define_command{
   capability = 'signature_help',
 }
 
-define_command{
+local rename = {
   command = 'rename',
   attached = true,
   range = false,
@@ -175,7 +170,7 @@ define_command{
   capability = 'rename',
 }
 
-define_command{
+local format = {
   command = 'format',
   attached = true,
   run = function(args, range)
@@ -255,7 +250,7 @@ define_command{
   capability = 'formatting', -- TODO: check range_formatting
 }
 
-define_command{
+local find = {
   -- TODO: different name? "symbols" is used by document_symbol
   command = 'find',
   attached = true,
@@ -269,7 +264,7 @@ define_command{
   capability = 'workspace_symbol',
 }
 
-define_command{
+local workspace = {
   command = 'workspace',
   range = false,
   attached = true,
@@ -309,7 +304,7 @@ define_command{
   capability = 'workspace',
 }
 
-define_command{
+local info = {
   command = 'info',
   range = false,
   run = function(args)
@@ -320,7 +315,7 @@ define_command{
   end,
 }
 
-define_command{
+local start = {
   command = 'start',
   range = false,
   run = function(args)
@@ -353,7 +348,7 @@ define_command{
   end,
 }
 
-define_command{
+local stop = {
   command = 'stop',
   range = false,
   run = function(args)
@@ -366,7 +361,7 @@ define_command{
   complete = complete_active_clients,
 }
 
-define_command{
+local restart = {
   command = 'restart',
   range = false,
   run = function(args)
@@ -383,7 +378,7 @@ define_command{
   complete = complete_active_clients,
 }
 
-define_command{
+local incomingcalls = {
   command = 'incomingcalls',
   attached = true,
   range = false,
@@ -391,7 +386,7 @@ define_command{
   capability = 'call_hierarchy',
 }
 
-define_command{
+local outgoingcalls = {
   command = 'outgoingcalls',
   attached = true,
   range = false,
@@ -399,6 +394,28 @@ define_command{
   capability = 'call_hierarchy',
 }
 
+
+local commands = {
+  codeaction,
+  definition,
+  declaration,
+  typedefinition,
+  symbols,
+  hover,
+  implementation,
+  references,
+  signature,
+  rename,
+  format,
+  find,
+  workspace,
+  info,
+  start,
+  stop,
+  restart,
+  incomingcalls,
+  outgoingcalls,
+}
 
 for _, command in ipairs(commands) do
   local name = command.command
