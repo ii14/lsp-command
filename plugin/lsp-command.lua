@@ -148,6 +148,18 @@ define_command{
 }
 
 define_command{
+  command = 'rename',
+  attached = true,
+  range = false,
+  run = function(args)
+    if #args > 1 then
+      return echoerr('Expected zero or one argument')
+    end
+    vim.lsp.buf.rename(args[1])
+  end,
+}
+
+define_command{
   command = 'format',
   attached = true,
   run = function(args, range)

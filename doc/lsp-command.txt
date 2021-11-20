@@ -51,6 +51,12 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
 :Lsp si[gnature]                                        *:Lsp-signature*
         |vim.lsp.buf.signature_help()|
 
+:Lsp ren[ame] [{new_name}]                              *:Lsp-rename*
+        Renames the symbol under the cursor to {new_name}. If new name is
+        not provided, prompts for a new name.
+
+        |vim.lsp.buf.rename()|
+
 :[range]Lsp f[ormat] [sync[={timeout}]] [order={order}] *:Lsp-format*
         Formats the current buffer.
 
