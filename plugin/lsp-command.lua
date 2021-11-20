@@ -95,6 +95,7 @@ define_command{
       return complete_filter(args[#args], vim.tbl_keys(kinds))
     end
   end,
+  capability = 'code_action',
 }
 
 define_command{
@@ -102,6 +103,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.definition),
+  capability = 'definition',
 }
 
 define_command{
@@ -109,6 +111,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.declaration),
+  capability = 'declaration',
 }
 
 define_command{
@@ -116,6 +119,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.type_definition),
+  capability = 'type_definition',
 }
 
 define_command{
@@ -123,6 +127,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.document_symbol),
+  capability = 'document_symbol',
 }
 
 define_command{
@@ -130,6 +135,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.hover),
+  capability = 'hover',
 }
 
 define_command{
@@ -137,6 +143,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.implementation),
+  capability = 'implementation',
 }
 
 define_command{
@@ -144,6 +151,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.references),
+  capability = 'references',
 }
 
 define_command{
@@ -151,6 +159,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.signature_help),
+  capability = 'signature_help',
 }
 
 define_command{
@@ -163,6 +172,7 @@ define_command{
     end
     vim.lsp.buf.rename(args[1])
   end,
+  capability = 'rename',
 }
 
 define_command{
@@ -225,6 +235,7 @@ define_command{
   complete = function(args)
     return complete_filter(args[#args], {'sync', 'order='})
   end,
+  capability = 'formatting', -- TODO: check range_formatting
 }
 
 define_command{
@@ -238,6 +249,7 @@ define_command{
     end
     vim.lsp.buf.workspace_symbol(args[1] or '')
   end,
+  capability = 'workspace_symbol',
 }
 
 define_command{
@@ -277,6 +289,7 @@ define_command{
       end
     end
   end,
+  capability = 'workspace',
 }
 
 define_command{
@@ -358,6 +371,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.incoming_calls),
+  capability = 'call_hierarchy',
 }
 
 define_command{
@@ -365,6 +379,7 @@ define_command{
   attached = true,
   range = false,
   run = wrap_simple_command(vim.lsp.buf.outgoing_calls),
+  capability = 'call_hierarchy',
 }
 
 
@@ -392,12 +407,28 @@ function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
   if #args < 1 then return {} end
 
   local has_range = fn.strpart(CmdLine, 0, begin):match('%S') ~= nil
-  local is_attached = (function()
-    for _ in ipairs(vim.lsp.buf_get_clients(0)) do
-      return true
-    end
-    return false
-  end)()
+  local is_attached = false
+  local capabilities = {}
+  for _, client in ipairs(vim.lsp.buf_get_clients(0)) do
+    is_attached = true
+    local c = client.resolved_capabilities
+    if c.hover                     then capabilities.hover            = true end
+    if c.goto_definition           then capabilities.definition       = true end
+    if c.find_references           then capabilities.references       = true end
+    if c.document_symbol           then capabilities.document_symbol  = true end
+    if c.workspace_symbol          then capabilities.workspace_symbol = true end
+    if c.document_formatting       then capabilities.formatting       = true end
+    if c.document_range_formatting then capabilities.range_formatting = true end
+    if c.call_hierarchy            then capabilities.call_hierarchy   = true end
+    if c.rename                    then capabilities.rename           = true end
+    if c.code_action               then capabilities.code_action      = true end
+    if c.declaration               then capabilities.declaration      = true end
+    if c.type_definition           then capabilities.type_definition  = true end
+    if c.implementation            then capabilities.implementation   = true end
+    if c.workspace                 then capabilities.workspace        = true end
+    if c.signature_help            then capabilities.signature_help   = true end
+  end
+  vim.g.lsp_caps = capabilities
 
   -- remove first argument, "Lsp"
   table.remove(args, 1)
@@ -412,6 +443,7 @@ function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
     for _, command in ipairs(commands) do
       if (command.range == nil or command.range == has_range) and
           (not command.attached or is_attached) and
+          (not command.capability or capabilities[command.capability]) and
           fn.stridx(command.command, ArgLead) == 0 then
         table.insert(results, command.command)
       end
