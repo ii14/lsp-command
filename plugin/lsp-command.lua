@@ -113,6 +113,13 @@ define_command{
 }
 
 define_command{
+  command = 'typedefinition',
+  attached = true,
+  range = false,
+  run = wrap_simple_command(vim.lsp.buf.type_definition),
+}
+
+define_command{
   command = 'symbols',
   attached = true,
   range = false,

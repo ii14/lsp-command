@@ -39,6 +39,9 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
 :Lsp i[mplementation]                                   *:Lsp-implementation*
         |vim.lsp.buf.implementation()|
 
+:Lsp t[ypedefinition]                                   *:Lsp-typedefinition*
+        |vim.lsp.buf.type_definition()|
+
 :Lsp r[eferences]                                       *:Lsp-references*
         |vim.lsp.buf.references()|
 
