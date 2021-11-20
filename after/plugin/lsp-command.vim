@@ -1,0 +1,4 @@
+delcommand LspInfo
+delcommand LspStart
+delcommand LspStop
+delcommand LspRestart
