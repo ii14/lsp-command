@@ -78,5 +78,14 @@ BUFFER COMMANDS                                         *lsp-command-buffer*
 
         |vim.lsp.buf.code_action()|, |vim.lsp.buf.range_code_action()|
 
+:Lsp w[orkspace] [add,remove {folder}]                  *:Lsp-workspace*
+        Without arguments lists workspace folders.
+
+        Example: `Lsp workspace add path/to/dir`
+
+        |vim.lsp.buf.list_workspace_folders()|,
+        |vim.lsp.buf.add_workspace_folder()|,
+        |vim.lsp.buf.remove_workspace_folder()|
+
 ==============================================================================
 vim:tw=78:sw=8:sts=8:et:ft=help:norl:

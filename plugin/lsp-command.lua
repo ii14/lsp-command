@@ -1,14 +1,34 @@
 local fn = vim.fn
 
+local function echo(msg)
+  vim.api.nvim_echo({{msg}}, false, {})
+  return nil
+end
+
 local function echoerr(msg)
   vim.api.nvim_echo({{'Lsp: '..msg, 'ErrorMsg'}}, true, {})
   return nil
 end
 
-local function complete_active_clients()
-  return vim.tbl_map(function(client)
+local function complete_filter(arglead, candidates)
+  if not candidates then
+    return {}
+  end
+  arglead = arglead or ''
+
+  local results = {}
+  for _, k in ipairs(candidates) do
+    if fn.stridx(k, arglead) == 0 then
+      table.insert(results, k)
+    end
+  end
+  return results
+end
+
+local function complete_active_clients(args)
+  return complete_filter(args[#args], vim.tbl_map(function(client)
     return ("%d (%s)"):format(client.id, client.name)
-  end, vim.lsp.get_active_clients())
+  end, vim.lsp.get_active_clients()))
 end
 
 local function parse_clients(args)
@@ -64,7 +84,7 @@ define_command{
   complete = function(args)
     -- TODO: check server capabilities?
     if #args == 1 then
-      return {
+      return complete_filter(args[#args], {
         'quickfix',
         'refactor',
         'refactor.extract',
@@ -73,7 +93,7 @@ define_command{
         'source',
         'source.organizeImports',
         'source.fixAll',
-      }
+      })
     end
   end,
 }
@@ -184,8 +204,47 @@ define_command{
       end
     end
   end,
-  complete = function()
-    return {'sync', 'order='}
+  complete = function(args)
+    return complete_filter(args[#args], {'sync', 'order='})
+  end,
+}
+
+define_command{
+  command = 'workspace',
+  range = false,
+  attached = true,
+  run = function(args)
+    if #args == 0 then
+      local folders = vim.lsp.buf.list_workspace_folders()
+      if #folders > 0 then
+        for _, folder in ipairs(folders) do
+          echo(folder)
+        end
+      else
+        echo('No workspace folders')
+      end
+    elseif #args == 2 then
+      if args[1] == 'add' then
+        vim.lsp.buf.add_workspace_folder(fn.fnamemodify(args[2], ':p'))
+      elseif args[1] == 'remove' then
+        vim.lsp.buf.remove_workspace_folder(args[2])
+      else
+        return echoerr('Invalid argument: '..args[1])
+      end
+    else
+      return echoerr('Invalid arguments')
+    end
+  end,
+  complete = function(args)
+    if #args == 1 then
+      return complete_filter(args[#args], {'add', 'remove'})
+    elseif #args == 2 then
+      if args[1] == 'add' then
+        return fn.getcompletion(args[#args], 'dir')
+      elseif args[1] == 'remove' then
+        return complete_filter(args[#args], vim.lsp.buf.list_workspace_folders())
+      end
+    end
   end,
 }
 
@@ -228,7 +287,7 @@ define_command{
   end,
   complete = function(args)
     if #args == 1 then
-      return require('lspconfig').available_servers()
+      return complete_filter(args[#args], require('lspconfig').available_servers())
     end
   end,
 }
@@ -322,19 +381,13 @@ function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
       not (not command.attached or is_attached) then
     return {}
   end
-  local complete = command.complete
-  if not complete then return {} end
-  table.remove(args, 1)
-  local completions = complete(args)
-  if not completions then return {} end
 
-  local results = {}
-  for _, k in ipairs(completions) do
-    if fn.stridx(k, ArgLead) == 0 then
-      table.insert(results, k)
-    end
+  local complete = command.complete
+  if complete then
+    table.remove(args, 1)
+    return complete(args)
   end
-  return results
+  return {}
 end
 
 function _G._lsp_command(ctx)
