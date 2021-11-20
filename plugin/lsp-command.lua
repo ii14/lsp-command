@@ -82,18 +82,18 @@ define_command{
     end
   end,
   complete = function(args)
-    -- TODO: check server capabilities?
     if #args == 1 then
-      return complete_filter(args[#args], {
-        'quickfix',
-        'refactor',
-        'refactor.extract',
-        'refactor.inline',
-        'refactor.rewrite',
-        'source',
-        'source.organizeImports',
-        'source.fixAll',
-      })
+      local kinds = {}
+      for _, client in ipairs(vim.lsp.buf_get_clients()) do
+        local code_action = client.resolved_capabilities.code_action
+        if code_action then
+          for _, kind in ipairs(code_action.codeActionKinds) do
+            kinds[kind] = true
+          end
+        end
+      end
+      kinds = vim.tbl_keys(kinds)
+      return complete_filter(args[#args], kinds)
     end
   end,
 }
