@@ -1,12 +1,15 @@
-*lsp-command.txt*                                 Lsp command
+*lsp-command.txt*                                         Lsp command
 
 ==============================================================================
-:Lsp {subcommand} [arguments]                   *:Lsp* *lsp-command*
+:Lsp {subcommand} [arguments]                           *:Lsp* *lsp-command*
 
-:Lsp i[nfo]                                     *:Lsp-info*
+------------------------------------------------------------------------------
+GLOBAL COMMANDS                                         *lsp-command-global*
+
+:Lsp in[fo]                                             *:Lsp-info* *:Lsp?*
         Shows the status of active and configured language servers.
 
-:Lsp s[tart] [server-name]                      *:Lsp-start*
+:Lsp st[art] [{server-name}]                            *:Lsp-start*
         Start the requested server name.
         Will only successfully start if the command detects a root directory
         matching the current config. Pass `autostart = false` to your `.setup{}`
@@ -14,13 +17,66 @@
         with this command. Defaults to all servers matching current buffer
         filetype.
 
-:Lsp sto[p] [client-ids]                        *:Lsp-stop*
+        Example: `:Lsp start clangd`
+
+:Lsp sto[p] [{client-ids}]                              *:Lsp-stop*
         Manually stops the given language client(s).
         Defaults to stopping all buffer clients.
 
-:Lsp r[estart] [client-ids]                     *:Lsp-restart*
+:Lsp res[tart] [{client-ids}]                           *:Lsp-restart*
         Manually restart the given language client(s).
         Defaults to restarting all buffer clients.
+
+------------------------------------------------------------------------------
+BUFFER COMMANDS                                         *lsp-command-buffer*
+
+:Lsp d[efinition]                                       *:Lsp-definition*
+        |vim.lsp.buf.definition()|
+
+:Lsp dec[laration]                                      *:Lsp-declaration*
+        |vim.lsp.buf.declaration()|
+
+:Lsp i[mplementation]                                   *:Lsp-implementation*
+        |vim.lsp.buf.implementation()|
+
+:Lsp r[eferences]                                       *:Lsp-references*
+        |vim.lsp.buf.references()|
+
+:Lsp s[ymbols]                                          *:Lsp-symbols*
+        |vim.lsp.buf.document_symbol()|
+
+:Lsp h[over]                                            *:Lsp-hover*
+        |vim.lsp.buf.hover()|
+
+:Lsp si[gnature]                                        *:Lsp-signature*
+        |vim.lsp.buf.signature_help()|
+
+:[range]Lsp f[ormat] [sync[={timeout}]] [order={order}] *:Lsp-format*
+        Formats the current buffer.
+
+        If sync is given, performs formatting synchronously, with optional
+        {timeout} in milliseconds. Useful for running on save, to make sure
+        buffer is formatted prior to being saved.
+
+        When multiple clients are attached, the {order} of semicolon delimited
+        client names can be specified. Formatting is requested from clients in
+        the following order: first all clients that are not in the {order}
+        list, then the remaining clients in the order as they occur in the
+        {order} list. {order} implies {sync}.
+
+        Example: `:Lsp format sync=500 order=clangd,gopls,tsserver`
+
+        |vim.lsp.buf.formatting()|, |vim.lsp.buf.range_formatting()|,
+        |vim.lsp.buf.formatting_sync()|, |vim.lsp.buf.formatting_seq_sync()|
+
+:[range]Lsp c[odeaction] [{kind}]                       *:Lsp-codeaction*
+        Selects a code action available at the current cursor position, or
+        for a given range.
+
+        Optional {kind} will filter the code actions, if supported by the
+        language server.
+
+        |vim.lsp.buf.code_action()|, |vim.lsp.buf.range_code_action()|
 
 ==============================================================================
 vim:tw=78:sw=8:sts=8:et:ft=help:norl:
