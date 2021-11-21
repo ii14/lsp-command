@@ -398,7 +398,6 @@ function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
     if c.workspace                 then capabilities.workspace        = true end
     if c.signature_help            then capabilities.signature_help   = true end
   end
-  vim.g.lsp_caps = capabilities
 
   -- remove first argument, "Lsp"
   table.remove(args, 1)

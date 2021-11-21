@@ -15,7 +15,7 @@ actions supported by the attached language server are suggested.
 
 Custom commands in vim have to start with an uppercase letter, but this plugin goes around
 it by defining a basic command line abbreviation, or an alias, from the lowercase `:lsp`.
-This means all of the examples above can be also written as without capitalizing the first
+This means all of the examples above can be also written without capitalizing the first
 letter: `:lsp find foo`, `:lsp format`, `:lsp info` etc.
 
 The interface is not final. Command names, their arguments and how they can be abbreviated
