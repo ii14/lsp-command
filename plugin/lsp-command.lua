@@ -122,7 +122,7 @@ local codeaction = {
   complete = function(args)
     if #args == 1 then
       local kinds = {}
-      for _, client in ipairs(vim.lsp.buf_get_clients()) do
+      for _, client in pairs(vim.lsp.buf_get_clients()) do
         local code_action = client.resolved_capabilities.code_action
         if type(code_action) == 'table' then
           for _, kind in ipairs(code_action.codeActionKinds) do
@@ -379,7 +379,7 @@ function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
   local has_range = fn.strpart(CmdLine, 0, begin):match('%S') ~= nil
   local is_attached = false
   local capabilities = {}
-  for _, client in ipairs(vim.lsp.buf_get_clients(0)) do
+  for _, client in pairs(vim.lsp.buf_get_clients(0)) do
     is_attached = true
     local c = client.resolved_capabilities
     if c.hover                     then capabilities.hover            = true end
@@ -465,7 +465,7 @@ function _G._lsp_command(ctx)
 
   if command.attached == true then
     if not (function()
-      for _ in ipairs(vim.lsp.buf_get_clients(0)) do
+      for _ in pairs(vim.lsp.buf_get_clients(0)) do
         return true
       end
       return false
