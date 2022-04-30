@@ -1,4 +1,5 @@
 local fn = vim.fn
+local buf = vim.lsp.buf
 
 local function echo(msg)
   vim.api.nvim_echo({{msg}}, false, {})
@@ -66,16 +67,16 @@ local function simple_command(name, func, capability)
   }
 end
 
-local definition     = simple_command('definition', vim.lsp.buf.definition, 'definition')
-local declaration    = simple_command('declaration', vim.lsp.buf.declaration, 'declaration')
-local typedefinition = simple_command('typedefinition', vim.lsp.buf.type_definition, 'type_definition')
-local symbols        = simple_command('symbols', vim.lsp.buf.document_symbol, 'document_symbol')
-local hover          = simple_command('hover', vim.lsp.buf.hover, 'hover')
-local implementation = simple_command('implementation', vim.lsp.buf.implementation, 'implementation')
-local references     = simple_command('references', vim.lsp.buf.references, 'references')
-local signature      = simple_command('signature', vim.lsp.buf.signature_help, 'signature_help')
-local incomingcalls  = simple_command('incomingcalls', vim.lsp.buf.incoming_calls, 'call_hierarchy')
-local outgoingcalls  = simple_command('outgoingcalls', vim.lsp.buf.outgoing_calls, 'call_hierarchy')
+local definition     = simple_command('definition',     buf.definition,      'definitionProvider')
+local declaration    = simple_command('declaration',    buf.declaration,     'declarationProvider')
+local typedefinition = simple_command('typedefinition', buf.type_definition, 'typeDefinitionProvider')
+local symbols        = simple_command('symbols',        buf.document_symbol, 'documentSymbolProvider')
+local hover          = simple_command('hover',          buf.hover,           'hoverProvider')
+local implementation = simple_command('implementation', buf.implementation,  'implementationProvider')
+local references     = simple_command('references',     buf.references,      'referencesProvider')
+local signature      = simple_command('signature',      buf.signature_help,  'signatureHelpProvider')
+local incomingcalls  = simple_command('incomingcalls',  buf.incoming_calls,  'callHierarchyProvider')
+local outgoingcalls  = simple_command('outgoingcalls',  buf.outgoing_calls,  'callHierarchyProvider')
 
 local rename = {
   command = 'rename',
@@ -87,7 +88,7 @@ local rename = {
     end
     vim.lsp.buf.rename(args[1])
   end,
-  capability = 'rename',
+  capability = 'renameProvider',
 }
 
 local find = {
@@ -101,7 +102,7 @@ local find = {
     end
     vim.lsp.buf.workspace_symbol(args[1] or '')
   end,
-  capability = 'workspace_symbol',
+  capability = 'workspaceSymbolProvider',
 }
 
 local codeaction = {
@@ -133,7 +134,7 @@ local codeaction = {
       return complete_filter(args[#args], vim.tbl_keys(kinds))
     end
   end,
-  capability = 'code_action',
+  capability = 'codeActionProvider',
 }
 
 local format = {
@@ -213,7 +214,8 @@ local format = {
       return complete_filter(arg, {'sync', 'order='})
     end
   end,
-  capability = 'formatting', -- TODO: check range_formatting
+  -- TODO: check documentRangeFormattingProvider
+  capability = 'documentFormattingProvider',
 }
 
 local workspace = {
@@ -253,7 +255,7 @@ local workspace = {
       end
     end
   end,
-  capability = 'workspace',
+  capability = 'workspaceFolders',
 }
 
 local info = {
@@ -378,25 +380,14 @@ local function comp(ArgLead, CmdLine, CursorPos)
 
   local has_range = fn.strpart(CmdLine, 0, begin):match('%S') ~= nil
   local is_attached = false
-  local capabilities = {}
+  local caps = {}
   for _, client in pairs(vim.lsp.buf_get_clients(0)) do
     is_attached = true
-    local c = client.resolved_capabilities
-    if c.hover                     then capabilities.hover            = true end
-    if c.goto_definition           then capabilities.definition       = true end
-    if c.find_references           then capabilities.references       = true end
-    if c.document_symbol           then capabilities.document_symbol  = true end
-    if c.workspace_symbol          then capabilities.workspace_symbol = true end
-    if c.document_formatting       then capabilities.formatting       = true end
-    if c.document_range_formatting then capabilities.range_formatting = true end
-    if c.call_hierarchy            then capabilities.call_hierarchy   = true end
-    if c.rename                    then capabilities.rename           = true end
-    if c.code_action               then capabilities.code_action      = true end
-    if c.declaration               then capabilities.declaration      = true end
-    if c.type_definition           then capabilities.type_definition  = true end
-    if c.implementation            then capabilities.implementation   = true end
-    if c.workspace                 then capabilities.workspace        = true end
-    if c.signature_help            then capabilities.signature_help   = true end
+    for k, v in pairs(client.server_capabilities) do
+      if v then
+        caps[k] = true
+      end
+    end
   end
 
   -- remove first argument, "Lsp"
@@ -412,7 +403,7 @@ local function comp(ArgLead, CmdLine, CursorPos)
     for _, command in ipairs(commands) do
       if (command.range == nil or command.range == has_range) and
           (not command.attached or is_attached) and
-          (not command.capability or capabilities[command.capability]) and
+          (not command.capability or caps[command.capability]) and
           fn.stridx(command.command, ArgLead) == 0 then
         table.insert(results, command.command)
       end
