@@ -2,7 +2,7 @@
 
 ==============================================================================
 :Lsp {subcommand} [arguments]                           *:Lsp* *:lsp* *lsp-command*
-        Lowercase *:lsp* alias is defined by default, meaning you don't
+        Lowercase :lsp alias is defined by default, meaning you don't
         have to capitalize the command name. Example: `:lsp def`
 
 ------------------------------------------------------------------------------
