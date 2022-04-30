@@ -367,7 +367,7 @@ local function match_command(s)
 end
 
 
-function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
+local function comp(ArgLead, CmdLine, CursorPos)
   local cmdline = fn.strpart(CmdLine, 0, CursorPos) -- trim cmdline to cursor position
   -- TODO: handle incomplete command name like ":Ls"
   --       also might not work with ":/Lsp /Lsp start"
@@ -436,7 +436,7 @@ function _G._lsp_complete(ArgLead, CmdLine, CursorPos)
   return {}
 end
 
-function _G._lsp_command(ctx)
+local function run(ctx)
   local args = fn.split(ctx.args)
   if #args == 0 then
     return echoerr('Expected subcommand')
@@ -477,19 +477,7 @@ function _G._lsp_command(ctx)
   command.run(args, range)
 end
 
-
-vim.cmd([[
-  command! -bar -range=% -nargs=+ -complete=customlist,v:lua._lsp_complete Lsp
-    \ call luaeval('_lsp_command(_A[1])', [{
-    \   'args': <q-args>, 'range': <range>, 'line1': <line1>, 'line2': <line2>,
-    \ }])
-]])
-
-local no_lowercase = vim.g.lsp_no_lowercase
-if no_lowercase == nil or (no_lowercase ~= false and no_lowercase ~= 0) then
-  -- TODO: better range matching
-  vim.cmd([[
-    cnoreabbrev <expr> lsp getcmdtype() ==# ':' &&
-      \ (getcmdline() ==# 'lsp' <bar><bar> getcmdline() ==# "'<,'>lsp") ? 'Lsp' : 'lsp'
-  ]])
-end
+return {
+  run = run,
+  comp = comp,
+}
