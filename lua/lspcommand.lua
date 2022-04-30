@@ -1,13 +1,15 @@
 local fn = vim.fn
-local buf = vim.lsp.buf
+local api = vim.api
+local lsp = vim.lsp
+local buf = lsp.buf
 
 local function echo(msg)
-  vim.api.nvim_echo({{msg}}, false, {})
+  api.nvim_echo({{msg}}, false, {})
   return nil
 end
 
 local function echoerr(msg)
-  vim.api.nvim_echo({{'Lsp: '..msg, 'ErrorMsg'}}, true, {})
+  api.nvim_echo({{'Lsp: '..msg, 'ErrorMsg'}}, true, {})
   return nil
 end
 
@@ -29,14 +31,14 @@ end
 local function complete_active_clients(args)
   return complete_filter(args[#args], vim.tbl_map(function(client)
     return ("%d (%s)"):format(client.id, client.name)
-  end, vim.lsp.get_active_clients()))
+  end, lsp.get_active_clients()))
 end
 
 local function parse_clients(args)
   local clients = {}
   for _, arg in ipairs(args) do
     if arg:match('^%d+$') then
-      local client = vim.lsp.get_client_by_id(tonumber(arg))
+      local client = lsp.get_client_by_id(tonumber(arg))
       if client == nil then
         return echoerr('No client with id '..arg)
       end
@@ -47,7 +49,7 @@ local function parse_clients(args)
   end
 
   if vim.tbl_isempty(clients) then
-    return vim.lsp.get_active_clients()
+    return lsp.get_active_clients()
   end
   return vim.tbl_values(clients)
 end
@@ -86,7 +88,7 @@ local rename = {
     if #args > 1 then
       return echoerr('Expected zero or one argument')
     end
-    vim.lsp.buf.rename(args[1])
+    buf.rename(args[1])
   end,
   capability = 'renameProvider',
 }
@@ -100,7 +102,7 @@ local find = {
     if #args > 1 then
       return echoerr('Expected zero or one argument')
     end
-    vim.lsp.buf.workspace_symbol(args[1] or '')
+    buf.workspace_symbol(args[1] or '')
   end,
   capability = 'workspaceSymbolProvider',
 }
@@ -115,15 +117,15 @@ local codeaction = {
     end
     local context = { only = args[1] }
     if range then
-      vim.lsp.buf.range_code_action(context, range[1], range[2])
+      buf.range_code_action(context, range[1], range[2])
     else
-      vim.lsp.buf.code_action(context)
+      buf.code_action(context)
     end
   end,
   complete = function(args)
     if #args == 1 then
       local kinds = {}
-      for _, client in pairs(vim.lsp.buf_get_clients()) do
+      for _, client in pairs(lsp.buf_get_clients()) do
         local code_action = client.resolved_capabilities.code_action
         if type(code_action) == 'table' then
           for _, kind in ipairs(code_action.codeActionKinds) do
@@ -182,15 +184,15 @@ local format = {
       end
 
       if order then
-        vim.lsp.buf.formatting_seq_sync(nil, sync, order)
+        buf.formatting_seq_sync(nil, sync, order)
       else
-        vim.lsp.buf.formatting_sync(nil, sync)
+        buf.formatting_sync(nil, sync)
       end
     else
       if range then
-        vim.lsp.buf.range_formatting(nil, range[1], range[2])
+        buf.range_formatting(nil, range[1], range[2])
       else
-        vim.lsp.buf.formatting()
+        buf.formatting()
       end
     end
   end,
@@ -224,7 +226,7 @@ local workspace = {
   attached = true,
   run = function(args)
     if #args == 0 then
-      local folders = vim.lsp.buf.list_workspace_folders()
+      local folders = buf.list_workspace_folders()
       if #folders > 0 then
         for _, folder in ipairs(folders) do
           echo(folder)
@@ -234,9 +236,9 @@ local workspace = {
       end
     elseif #args == 2 then
       if args[1] == 'add' then
-        vim.lsp.buf.add_workspace_folder(fn.fnamemodify(args[2], ':p'))
+        buf.add_workspace_folder(fn.fnamemodify(args[2], ':p'))
       elseif args[1] == 'remove' then
-        vim.lsp.buf.remove_workspace_folder(args[2])
+        buf.remove_workspace_folder(args[2])
       else
         return echoerr('Invalid argument: '..args[1])
       end
@@ -251,7 +253,7 @@ local workspace = {
       if args[1] == 'add' then
         return fn.getcompletion(args[#args], 'dir')
       elseif args[1] == 'remove' then
-        return complete_filter(args[#args], vim.lsp.buf.list_workspace_folders())
+        return complete_filter(args[#args], buf.list_workspace_folders())
       end
     end
   end,
@@ -381,7 +383,7 @@ local function comp(ArgLead, CmdLine, CursorPos)
   local has_range = fn.strpart(CmdLine, 0, begin):match('%S') ~= nil
   local is_attached = false
   local caps = {}
-  for _, client in pairs(vim.lsp.buf_get_clients(0)) do
+  for _, client in pairs(lsp.buf_get_clients(0)) do
     is_attached = true
     for k, v in pairs(client.server_capabilities) do
       if v then
@@ -456,7 +458,7 @@ local function run(ctx)
 
   if command.attached == true then
     if not (function()
-      for _ in pairs(vim.lsp.buf_get_clients(0)) do
+      for _ in pairs(lsp.buf_get_clients(0)) do
         return true
       end
       return false
