@@ -1,4 +1,4 @@
-*lsp-command.txt*                                         Lsp command
+*lspcommand.txt*                                          Lsp command
 
 ==============================================================================
 :Lsp {subcommand} [arguments]                           *:Lsp* *:lsp* *lsp-command*
