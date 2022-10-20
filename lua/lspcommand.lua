@@ -184,17 +184,33 @@ local format = {
       end
 
       if order then
-        for _, name in pairs(order) do
-          buf.format({ async = false, timeout_ms = sync, name = name })
+        if buf.format then
+          for _, name in pairs(order) do
+            buf.format({ async = false, timeout_ms = sync, name = name })
+          end
+        else
+          buf.formatting_seq_sync(nil, sync, order)
         end
       else
-        buf.format({ async = false, timeout_ms = sync })
+        if buf.format then
+          buf.format({ async = false, timeout_ms = sync })
+        else
+          buf.formatting_sync(nil, sync)
+        end
       end
     else
       if range then
-        buf.format({ range = range })
+        if buf.format then
+          buf.format({ range = range })
+        else
+          buf.range_formatting(nil, range[1], range[2])
+        end
       else
-        buf.format({ async = true })
+        if buf.format then
+          buf.format({ async = true })
+        else
+          buf.formatting()
+        end
       end
     end
   end,
