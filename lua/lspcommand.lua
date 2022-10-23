@@ -302,7 +302,7 @@ local info = {
     if #args ~= 0 then
       return echoerr('No arguments allowed')
     end
-    require('lspconfig/ui/lspinfo')()
+    require('lspconfig.ui.lspinfo')()
   end,
 }
 
@@ -314,7 +314,7 @@ local start = {
       return echoerr('Expected zero or one argument')
     end
     local server_name = args[1]
-    local configs = require 'lspconfig/configs'
+    local configs = require('lspconfig.configs')
     if server_name then
       if configs[server_name] then
         configs[server_name].autostart()
@@ -359,7 +359,7 @@ local restart = {
     local clients = parse_clients(args)
     if clients == nil then return end
     for _, client in ipairs(clients) do
-      local configs = require 'lspconfig/configs'
+      local configs = require('lspconfig.configs')
       client.stop()
       vim.defer_fn(function()
         configs[client.name].autostart()
@@ -472,7 +472,7 @@ local function run(ctx)
 
   -- :Lsp?
   if ctx.args:match('%s*%?%s*') then
-    return require('lspconfig/ui/lspinfo')()
+    return require('lspconfig.ui.lspinfo')()
   end
 
   local command = match_command(args[1])
