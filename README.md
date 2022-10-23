@@ -25,4 +25,4 @@ Requires `neovim/lspconfig`.
 
 ## Usage
 
-[`:h :Lsp`](doc/lsp-command.txt)
+[`:h :Lsp`](doc/lspcommand.txt)
