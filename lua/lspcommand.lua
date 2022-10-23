@@ -1,7 +1,4 @@
-local fn = vim.fn
-local api = vim.api
-local lsp = vim.lsp
-local buf = lsp.buf
+local api, fn = vim.api, vim.fn
 
 local function echo(msg)
   api.nvim_echo({{msg}}, false, {})
@@ -48,14 +45,14 @@ end
 local function complete_active_clients(args)
   return complete_filter(args[#args], vim.tbl_map(function(client)
     return ("%d (%s)"):format(client.id, client.name)
-  end, lsp.get_active_clients()))
+  end, vim.lsp.get_active_clients()))
 end
 
 local function parse_clients(args)
   local clients = {}
   for _, arg in ipairs(args) do
     if arg:match('^%d+$') then
-      local client = lsp.get_client_by_id(tonumber(arg))
+      local client = vim.lsp.get_client_by_id(tonumber(arg))
       if client == nil then
         return echoerr('No client with id '..arg)
       end
@@ -66,7 +63,7 @@ local function parse_clients(args)
   end
 
   if vim.tbl_isempty(clients) then
-    return lsp.get_active_clients()
+    return vim.lsp.get_active_clients()
   end
   return vim.tbl_values(clients)
 end
@@ -80,22 +77,22 @@ local function simple_command(name, func, capability)
       if #args ~= 0 then
         return echoerr('No arguments allowed')
       end
-      func()
+      vim.lsp.buf[func]()
     end,
     capability = capability,
   }
 end
 
-local definition     = simple_command('definition',     buf.definition,      'definitionProvider')
-local declaration    = simple_command('declaration',    buf.declaration,     'declarationProvider')
-local typedefinition = simple_command('typedefinition', buf.type_definition, 'typeDefinitionProvider')
-local symbols        = simple_command('symbols',        buf.document_symbol, 'documentSymbolProvider')
-local hover          = simple_command('hover',          buf.hover,           'hoverProvider')
-local implementation = simple_command('implementation', buf.implementation,  'implementationProvider')
-local references     = simple_command('references',     buf.references,      'referencesProvider')
-local signature      = simple_command('signature',      buf.signature_help,  'signatureHelpProvider')
-local incomingcalls  = simple_command('incomingcalls',  buf.incoming_calls,  'callHierarchyProvider')
-local outgoingcalls  = simple_command('outgoingcalls',  buf.outgoing_calls,  'callHierarchyProvider')
+local definition     = simple_command('definition',     'definition',      'definitionProvider')
+local declaration    = simple_command('declaration',    'declaration',     'declarationProvider')
+local typedefinition = simple_command('typedefinition', 'type_definition', 'typeDefinitionProvider')
+local symbols        = simple_command('symbols',        'document_symbol', 'documentSymbolProvider')
+local hover          = simple_command('hover',          'hover',           'hoverProvider')
+local implementation = simple_command('implementation', 'implementation',  'implementationProvider')
+local references     = simple_command('references',     'references',      'referencesProvider')
+local signature      = simple_command('signature',      'signature_help',  'signatureHelpProvider')
+local incomingcalls  = simple_command('incomingcalls',  'incoming_calls',  'callHierarchyProvider')
+local outgoingcalls  = simple_command('outgoingcalls',  'outgoing_calls',  'callHierarchyProvider')
 
 local rename = {
   command = 'rename',
@@ -105,7 +102,7 @@ local rename = {
     if #args > 1 then
       return echoerr('Expected zero or one argument')
     end
-    buf.rename(args[1])
+    vim.lsp.buf.rename(args[1])
   end,
   capability = 'renameProvider',
 }
@@ -119,7 +116,7 @@ local find = {
     if #args > 1 then
       return echoerr('Expected zero or one argument')
     end
-    buf.workspace_symbol(args[1] or '')
+    vim.lsp.buf.workspace_symbol(args[1] or '')
   end,
   capability = 'workspaceSymbolProvider',
 }
@@ -134,9 +131,9 @@ local codeaction = {
     end
     local context = { only = args[1] }
     if range then
-      buf.range_code_action(context, range[1], range[2])
+      vim.lsp.buf.range_code_action(context, range[1], range[2])
     else
-      buf.code_action(context)
+      vim.lsp.buf.code_action(context)
     end
   end,
   complete = function(args)
@@ -201,32 +198,32 @@ local format = {
       end
 
       if order then
-        if buf.format then
+        if vim.lsp.buf.format then
           for _, name in pairs(order) do
-            buf.format({ async = false, timeout_ms = sync, name = name })
+            vim.lsp.buf.format({ async = false, timeout_ms = sync, name = name })
           end
         else
-          buf.formatting_seq_sync(nil, sync, order)
+          vim.lsp.buf.formatting_seq_sync(nil, sync, order)
         end
       else
-        if buf.format then
-          buf.format({ async = false, timeout_ms = sync })
+        if vim.lsp.buf.format then
+          vim.lsp.buf.format({ async = false, timeout_ms = sync })
         else
-          buf.formatting_sync(nil, sync)
+          vim.lsp.buf.formatting_sync(nil, sync)
         end
       end
     else
       if range then
-        if buf.format then
-          buf.format({ range = range })
+        if vim.lsp.buf.format then
+          vim.lsp.buf.format({ range = range })
         else
-          buf.range_formatting(nil, range[1], range[2])
+          vim.lsp.buf.range_formatting(nil, range[1], range[2])
         end
       else
-        if buf.format then
-          buf.format({ async = true })
+        if vim.lsp.buf.format then
+          vim.lsp.buf.format({ async = true })
         else
-          buf.formatting()
+          vim.lsp.buf.formatting()
         end
       end
     end
@@ -261,7 +258,7 @@ local workspace = {
   attached = true,
   run = function(args)
     if #args == 0 then
-      local folders = buf.list_workspace_folders()
+      local folders = vim.lsp.buf.list_workspace_folders()
       if #folders > 0 then
         for _, folder in ipairs(folders) do
           echo(folder)
@@ -271,9 +268,9 @@ local workspace = {
       end
     elseif #args == 2 then
       if args[1] == 'add' then
-        buf.add_workspace_folder(fn.fnamemodify(args[2], ':p'))
+        vim.lsp.buf.add_workspace_folder(fn.fnamemodify(args[2], ':p'))
       elseif args[1] == 'remove' then
-        buf.remove_workspace_folder(args[2])
+        vim.lsp.buf.remove_workspace_folder(args[2])
       else
         return echoerr('Invalid argument: '..args[1])
       end
@@ -288,7 +285,7 @@ local workspace = {
       if args[1] == 'add' then
         return fn.getcompletion(args[#args], 'dir')
       elseif args[1] == 'remove' then
-        return complete_filter(args[#args], buf.list_workspace_folders())
+        return complete_filter(args[#args], vim.lsp.buf.list_workspace_folders())
       end
     end
   end,
