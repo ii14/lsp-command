@@ -306,6 +306,14 @@ local info = {
   end,
 }
 
+local function launch(config)
+  if config.launch then
+    config.launch()
+  else
+    config.autostart()
+  end
+end
+
 local start = {
   command = 'start',
   range = false,
@@ -317,7 +325,7 @@ local start = {
     local configs = require('lspconfig.configs')
     if server_name then
       if configs[server_name] then
-        configs[server_name].autostart()
+        launch(configs[server_name])
       else
         return echoerr('Server not found: '..server_name)
       end
@@ -326,7 +334,7 @@ local start = {
       for _, config in pairs(configs) do
         for _, filetype_match in ipairs(config.filetypes or {}) do
           if buffer_filetype == filetype_match then
-            config.autostart()
+            launch(config)
           end
         end
       end
@@ -362,7 +370,7 @@ local restart = {
       local configs = require('lspconfig.configs')
       client.stop()
       vim.defer_fn(function()
-        configs[client.name].autostart()
+        launch(configs[client.name])
       end, 500)
     end
   end,
