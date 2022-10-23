@@ -13,6 +13,15 @@ local function echoerr(msg)
   return nil
 end
 
+local function available_servers()
+  local lspconfig = require('lspconfig')
+  if lspconfig.util.available_servers then
+    return lspconfig.util.available_servers()
+  else
+    return lspconfig.available_servers()
+  end
+end
+
 local function complete_filter(arglead, candidates)
   if not candidates then
     return {}
@@ -224,7 +233,7 @@ local format = {
         lookup[k] = true
       end
       local results = {}
-      for _, server in ipairs(require('lspconfig').available_servers()) do
+      for _, server in ipairs(available_servers()) do
         if not lookup[server] and fn.stridx(server, match) == 0 then
           table.insert(results, 'order='..start..server)
         end
@@ -317,7 +326,7 @@ local start = {
   end,
   complete = function(args)
     if #args == 1 then
-      return complete_filter(args[#args], require('lspconfig').available_servers())
+      return complete_filter(args[#args], available_servers())
     end
   end,
 }
