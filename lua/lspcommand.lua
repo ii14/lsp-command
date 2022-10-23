@@ -135,7 +135,7 @@ local codeaction = {
     if #args == 1 then
       local kinds = {}
       for _, client in pairs(lsp.buf_get_clients()) do
-        local code_action = client.resolved_capabilities.code_action
+        local code_action = client.server_capabilities.codeActionProvider
         if type(code_action) == 'table' then
           for _, kind in ipairs(code_action.codeActionKinds) do
             kinds[kind] = true
