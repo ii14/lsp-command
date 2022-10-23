@@ -13,6 +13,14 @@ local function echoerr(msg)
   return nil
 end
 
+local function get_clients()
+  if vim.lsp.get_active_clients then
+    return vim.lsp.get_active_clients({ bufnr = 0 })
+  else
+    return vim.lsp.buf_get_clients(0)
+  end
+end
+
 local function available_servers()
   local lspconfig = require('lspconfig')
   if lspconfig.util.available_servers then
@@ -134,7 +142,7 @@ local codeaction = {
   complete = function(args)
     if #args == 1 then
       local kinds = {}
-      for _, client in pairs(lsp.buf_get_clients()) do
+      for _, client in pairs(get_clients()) do
         local code_action = client.server_capabilities.codeActionProvider
         if type(code_action) == 'table' then
           for _, kind in ipairs(code_action.codeActionKinds) do
@@ -410,7 +418,7 @@ local function comp(ArgLead, CmdLine, CursorPos)
   local has_range = fn.strpart(CmdLine, 0, begin):match('%S') ~= nil
   local is_attached = false
   local caps = {}
-  for _, client in pairs(lsp.buf_get_clients(0)) do
+  for _, client in pairs(get_clients()) do
     is_attached = true
     for k, v in pairs(client.server_capabilities) do
       if v then
@@ -485,7 +493,7 @@ local function run(ctx)
 
   if command.attached == true then
     if not (function()
-      for _ in pairs(lsp.buf_get_clients(0)) do
+      for _ in pairs(get_clients()) do
         return true
       end
       return false
